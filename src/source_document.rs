@@ -8,16 +8,26 @@ use diesel_async::RunQueryDsl;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
+pub struct SourceDocument {
+    source: SourceDocumentModel,
+}
+
+/*
+#[derive(Debug, Clone)]
 pub enum SourceDocument {
     Document { source: SourceDocumentModel },
 }
+ */
 
 #[async_graphql::Object]
 impl SourceDocument {
     pub async fn version_id(&self, ctx: &async_graphql::Context<'_>) -> ID {
+        ID(self.source.version_id.clone())
+        /*
         match self {
             SourceDocument::Document { source } => ID(source.version_id.clone()),
         }
+         */
     }
 }
 
@@ -42,7 +52,8 @@ impl Loader<String> for SourceDocumentLoader {
             .map(|row| {
                 (
                     row.version_id.clone(),
-                    SourceDocument::Document { source: row },
+                    //SourceDocument::Document { source: row },
+                    SourceDocument{ source: row },
                 )
             })
             .collect())
