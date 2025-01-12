@@ -1,20 +1,28 @@
-mod schema;
 mod node;
+mod schema;
 mod source_document;
 
+use crate::node::GetNodeQuery;
+use crate::source_document::SourceDocumentLoader;
 use async_graphql::dataloader::DataLoader;
+use async_graphql::{EmptyMutation, EmptySubscription, MergedObject, Schema};
 use diesel::Queryable;
 use diesel_async::pooled_connection::deadpool::{Pool, PoolError};
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use diesel_async::AsyncPgConnection;
-use crate::source_document::SourceDocumentLoader;
+
+#[derive(MergedObject, Default)]
+struct Query(GetNodeQuery);
+
+type ServerSchema = Schema<Query, EmptyMutation, EmptySubscription>;
 
 #[tokio::main]
 async fn main() {
-    println!("Hello, world!");
     let config = AsyncDieselConnectionManager::<AsyncPgConnection>::new("database-url");
     let pool = Pool::builder(config).max_size(1).build().unwrap();
-    let l = DataLoader::new(SourceDocumentLoader { pool }, tokio::spawn);
+    let schema = Schema::build(Query::default(), EmptyMutation, EmptySubscription)
+        .data(DataLoader::new(SourceDocumentLoader { pool }, tokio::spawn))
+        .finish();
 }
 
 #[derive(thiserror::Error, Clone, Debug)]
@@ -42,4 +50,3 @@ impl From<diesel::result::Error> for LoaderError {
         }
     }
 }
-
