@@ -1,0 +1,11 @@
+[package]
+name = "adt_sized_constraint"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-graphql = { version = "=7.0.13", features = ["tracing", "chrono", "url", "dataloader"] }
+diesel = "=2.1.6"
+thiserror = "=2.0.10"
+diesel-async = { version = "=0.4.1", features = ["postgres", "deadpool"] }
+tokio = { version = "=1.42.0", features = ["full"] }
